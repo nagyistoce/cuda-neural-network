@@ -15,7 +15,7 @@ const int kLevelOfNeuralNetwork=3;
 //This indicates how many levels are there in a Neural Network(NN).
 //if kLevelOfNeuralNetwork==3, it means a NN with one input level,
 //one output level and one hidden level.
-const int kNumberOfUnits[]={4,600,4};
+const int kNumberOfUnits[]={4,401,4};
 /*This indicates how many neural units in each level.
  *kNumberOfUnits[0] == kInputSize;
  *kNumberOfUnits[kLevelOfNeuralNetwork-1] == kOutputSize.
@@ -107,7 +107,7 @@ void train(const int k_number_of_training,const int k_number_of_testing,const fl
 				//copy the input of the sample to the d_o[0]
 				cudaMemcpy(d_o[0],d_input+k*kInputSize,kInputSize*sizeof(float),cudaMemcpyDeviceToDevice);
 				for(int j=1;j<kLevelOfNeuralNetwork;j++){
-					int threads_per_block=std::min(400,kNumberOfUnits[j]);
+					int threads_per_block=std::min(200,kNumberOfUnits[j]);
 					int blocks_per_grid=(kNumberOfUnits[j]+threads_per_block-1)/threads_per_block;
 					//if(blocks_per_grid>1)
 					//	err("TOO MANY BLOCKS RUNNING AT THE SAME TIME",__FILE__,__LINE__);
@@ -124,7 +124,7 @@ void train(const int k_number_of_training,const int k_number_of_testing,const fl
 				for(int j=kLevelOfNeuralNetwork-1;j>0;j--){
 					//cudaMemset(d_delta[j-1],0,kNumberOfUnits[j-1]*sizeof(float));
 					//set all the delta in the fronter level to be zero
-					int threads_per_block=std::min(400,kNumberOfUnits[j]);
+					int threads_per_block=std::min(200,kNumberOfUnits[j]);
  					int blocks_per_grid=(kNumberOfUnits[j]+threads_per_block-1)/threads_per_block;
 					
 					BackPropagation<<<blocks_per_grid,threads_per_block>>>(d_o[j],d_o[j-1],d_output+kOutputSize*k,
@@ -137,7 +137,7 @@ void train(const int k_number_of_training,const int k_number_of_testing,const fl
 				cudaMemcpy(d_o[0],d_input+k*kInputSize,kInputSize*sizeof(float),cudaMemcpyDeviceToDevice);
 				cudaStatus = cudaGetLastError();
 				for(int j=1;j<kLevelOfNeuralNetwork;j++){
-					int threads_per_block=std::min(400,kNumberOfUnits[j]);
+					int threads_per_block=std::min(200,kNumberOfUnits[j]);
 					int blocks_per_grid=(kNumberOfUnits[j]+threads_per_block-1)/threads_per_block;
 					//if(blocks_per_grid>1)
 					//	err("TOO MANY BLOCKS RUNNING AT THE SAME TIME",__FILE__,__LINE__);
