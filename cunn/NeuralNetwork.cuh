@@ -1,8 +1,8 @@
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
-#include "stdlib.h"
+#include <cstdio>
+#include <cstdlib>
 #include <algorithm>
-#include "..\\..\\..\\wenx.h"
 #pragma once
 
 __device__ float expf(float x);
@@ -15,16 +15,26 @@ const int kLevelOfNeuralNetwork=3;
 //This indicates how many levels are there in a Neural Network(NN).
 //if kLevelOfNeuralNetwork==3, it means a NN with one input level,
 //one output level and one hidden level.
-const int kNumberOfUnits[]={4,200,4};
+const int kNumberOfUnits[]={4,600,4};
 /*This indicates how many neural units in each level.
  *kNumberOfUnits[0] == kInputSize;
  *kNumberOfUnits[kLevelOfNeuralNetwork-1] == kOutputSize.
  */
+
+struct NN_setting{
+	float learning_rate;
+	float impulse;
+};
+
+void OutputWeight(float *(h_weight[]),float *(d_weight[]));
+void set(float learning_rate=0.5f,float impulse=0.5f);
+void train(const int k_number_of_training,const int k_number_of_testing,const float* input,const float* output);
+
 __global__
-void ForwardCalc(float *wei,float *in,float *o,float *delta,int number_of_last_level,int number_of_this_level);
+	void ForwardCalc(float *wei,float *in,float *o,float *delta,int number_of_last_level,int number_of_this_level);
 __global__
-void BackPropagation(float *o,float *o_last,float *target,float *delta,float* delta_front,float *wei,
-	const int k_level,const int k_number_of_this_level,const int k_number_of_last_level);
+	void BackPropagation(float *o,float *o_last,float *target,float *delta,float* delta_front,float *wei,float *delta_wei,
+		const int k_level,const int k_number_of_this_level,const int k_number_of_last_level,NN_setting* d_setting);
 
 void OutputWeight(float *(h_weight[]),float *(d_weight[])){
 	for(int i=0;i<kLevelOfNeuralNetwork-1;i++){
@@ -37,8 +47,15 @@ void OutputWeight(float *(h_weight[]),float *(d_weight[])){
 	}
 }
 
-
-void train(int numberofsample,const float* input,const float* output){
+NN_setting h_setting;
+NN_setting *d_setting;
+void set(float learning_rate,float impulse){
+		h_setting.learning_rate=learning_rate;
+		h_setting.impulse=impulse;
+		cudaMalloc(&d_setting,sizeof(NN_setting));
+		cudaMemcpy(d_setting,&h_setting,sizeof(NN_setting),cudaMemcpyHostToDevice);
+	}
+void train(const int k_number_of_training,const int k_number_of_testing,const float* input,const float* output){
 		//Numberofsample: the number of samples for trainning.
 		//Input[i][j]   : the jth input for the ith sample.
 	
@@ -46,33 +63,37 @@ void train(int numberofsample,const float* input,const float* output){
 		float *d_input,*d_output;
 			//d_input[i+kInputSize*j] indicates the ith input of the jth sample.
 			//d_output[i+kOuputSize*j] indicates the ith output of the jth sample.
-		cudaMalloc(&d_input,kInputSize*numberofsample*sizeof(float));
+		cudaStatus=cudaMalloc(&d_input,kInputSize*(k_number_of_training+k_number_of_testing)*sizeof(float));
 			//malloc spaces for input in GDDR
-		cudaMalloc(&d_output,kOutputSize*numberofsample*sizeof(float));
+		cudaStatus=cudaMalloc(&d_output,kOutputSize*(k_number_of_training+k_number_of_testing)*sizeof(float));
 			//malloc spaces for output in GDDR
-		cudaMemcpy(d_input,input,kInputSize*numberofsample*sizeof(float),cudaMemcpyHostToDevice);
-		cudaMemcpy(d_output,output,kOutputSize*numberofsample*sizeof(float),cudaMemcpyHostToDevice);
+		cudaStatus=cudaMemcpy(d_input,input,kInputSize*(k_number_of_training+k_number_of_testing)*sizeof(float),cudaMemcpyHostToDevice);
+		cudaStatus=cudaMemcpy(d_output,output,kOutputSize*(k_number_of_training+k_number_of_testing)*sizeof(float),cudaMemcpyHostToDevice);
 			//Copy both the input data and the output data to the RAM of the vedio card.
 
 		float *(d_weight[kLevelOfNeuralNetwork-1]);
+		float *(d_delta_weight[kLevelOfNeuralNetwork-1]);
 		float *(h_weight[kLevelOfNeuralNetwork-1]);
 			//IMPORTANT:
 			//d_weight[i]+j*kNumberOfUnits[i]+k means the weight of the edge 
 			//from the kth unit in level i to the jth unit in level i+1.
 		for(int i=0;i<kLevelOfNeuralNetwork-1;i++){
 			srand(time(NULL));
-			cudaMalloc(&d_weight[i],kNumberOfUnits[i]*kNumberOfUnits[i+1]*sizeof(float));
+			cudaStatus=cudaMalloc(&d_weight[i],kNumberOfUnits[i]*kNumberOfUnits[i+1]*sizeof(float));
+			cudaStatus=cudaMalloc(&d_delta_weight[i],kNumberOfUnits[i]*kNumberOfUnits[i+1]*sizeof(float));
 			h_weight[i]=(float*)malloc(kNumberOfUnits[i]*kNumberOfUnits[i+1]*sizeof(float));
 			for(int j=0;j<kNumberOfUnits[i]*kNumberOfUnits[i+1];j++)
 				*(h_weight[i]+j)=rand()/(float)RAND_MAX-0.5f;
-			cudaMemcpy(d_weight[i],h_weight[i],kNumberOfUnits[i]*kNumberOfUnits[i+1]*sizeof(float),cudaMemcpyHostToDevice);
+			cudaStatus=cudaMemcpy(d_weight[i],h_weight[i],kNumberOfUnits[i]*kNumberOfUnits[i+1]*sizeof(float),cudaMemcpyHostToDevice);
+			memset(h_weight[i],0,kNumberOfUnits[i]*kNumberOfUnits[i+1]*sizeof(float));
+			cudaStatus=cudaMemcpy(d_delta_weight[i],h_weight[i],kNumberOfUnits[i]*kNumberOfUnits[i+1]*sizeof(float),cudaMemcpyHostToDevice);
 		}
 		
 		float *(d_o[kLevelOfNeuralNetwork]);
 		float *h_o_o;
 			//the output of each level of Neural Network
 		for(int i=0;i<kLevelOfNeuralNetwork;i++){
-			cudaMalloc(&d_o[i],kNumberOfUnits[i]*sizeof(float));
+			cudaStatus=cudaMalloc(&d_o[i],kNumberOfUnits[i]*sizeof(float));
 		}
 		h_o_o=(float *)malloc(kNumberOfUnits[kLevelOfNeuralNetwork-1]*sizeof(float));
 
@@ -80,54 +101,80 @@ void train(int numberofsample,const float* input,const float* output){
 		for(int i=0;i<kLevelOfNeuralNetwork;i++){
 			cudaStatus=cudaMalloc(&d_delta[i],kNumberOfUnits[i]*sizeof(float));
 		}
-		float errr=0;
-		for(int i=0;i<300;i++){
-			for(int k=0;k<numberofsample;k++){
+		float training_error=0,testing_error=0,testing_wrong=0;
+		for(int i=0;i<500000;i++){
+			for(int k=0;k<k_number_of_training;k++){
 				//copy the input of the sample to the d_o[0]
 				cudaMemcpy(d_o[0],d_input+k*kInputSize,kInputSize*sizeof(float),cudaMemcpyDeviceToDevice);
 				for(int j=1;j<kLevelOfNeuralNetwork;j++){
-					int threads_per_block=std::min(1024,kNumberOfUnits[j]);
+					int threads_per_block=std::min(400,kNumberOfUnits[j]);
 					int blocks_per_grid=(kNumberOfUnits[j]+threads_per_block-1)/threads_per_block;
-					if(blocks_per_grid>1)
-						err("TOO MANY BLOCKS RUNNING AT THE SAME TIME",__FILE__,__LINE__);
-					ForwardCalc<<<1,threads_per_block>>>(d_weight[j-1],d_o[j-1],d_o[j],d_delta[j],kNumberOfUnits[j-1],kNumberOfUnits[j]);
+					//if(blocks_per_grid>1)
+					//	err("TOO MANY BLOCKS RUNNING AT THE SAME TIME",__FILE__,__LINE__);
+					ForwardCalc<<<blocks_per_grid,threads_per_block>>>(d_weight[j-1],d_o[j-1],d_o[j],d_delta[j],kNumberOfUnits[j-1],kNumberOfUnits[j]);
+					cudaStatus = cudaGetLastError();
 				}
 				cudaMemcpy(h_o_o,d_o[kLevelOfNeuralNetwork-1],kOutputSize*sizeof(float),cudaMemcpyDeviceToHost);
 				for(int j=0;j<kOutputSize;j++){
 					if(*(output+kOutputSize*k+j)>0.5f)
-						errr+=abs(1-h_o_o[j]);
+						training_error+=abs(1-h_o_o[j]);
 					else
-						errr+=abs(h_o_o[j]);
+						training_error+=abs(h_o_o[j]);
 				}
 				for(int j=kLevelOfNeuralNetwork-1;j>0;j--){
 					//cudaMemset(d_delta[j-1],0,kNumberOfUnits[j-1]*sizeof(float));
 					//set all the delta in the fronter level to be zero
-					int threads_per_block=std::min(1024,kNumberOfUnits[j]);
-// 					int blocks_per_grid=(kNumberOfUnits[j]+threads_per_block-1)/threads_per_block;
-// 					if(blocks_per_grid>1)
-// 						err("TOO MANY BLOCKS RUNNING AT THE SAME TIME",__FILE__,__LINE__);
+					int threads_per_block=std::min(400,kNumberOfUnits[j]);
+ 					int blocks_per_grid=(kNumberOfUnits[j]+threads_per_block-1)/threads_per_block;
 					
-					
-					BackPropagation<<<1,threads_per_block>>>(d_o[j],d_o[j-1],d_output+kOutputSize*k,
-										d_delta[j],d_delta[j-1],d_weight[j-1],j,kNumberOfUnits[j],kNumberOfUnits[j-1]);	
+					BackPropagation<<<blocks_per_grid,threads_per_block>>>(d_o[j],d_o[j-1],d_output+kOutputSize*k,
+										d_delta[j],d_delta[j-1],d_weight[j-1],d_delta_weight[j-1],j,kNumberOfUnits[j],kNumberOfUnits[j-1], d_setting);	
+					cudaStatus = cudaGetLastError();
 				}
 				
-			}
-			if(i%1000==999)
-				printf("%10d::%10.5lf\n",i+1,errr),errr=0;
-			if(i==299000)
+			}//for k
+			for(int k=k_number_of_training;k<k_number_of_training+k_number_of_testing;k++){
+				cudaMemcpy(d_o[0],d_input+k*kInputSize,kInputSize*sizeof(float),cudaMemcpyDeviceToDevice);
+				cudaStatus = cudaGetLastError();
+				for(int j=1;j<kLevelOfNeuralNetwork;j++){
+					int threads_per_block=std::min(400,kNumberOfUnits[j]);
+					int blocks_per_grid=(kNumberOfUnits[j]+threads_per_block-1)/threads_per_block;
+					//if(blocks_per_grid>1)
+					//	err("TOO MANY BLOCKS RUNNING AT THE SAME TIME",__FILE__,__LINE__);
+					ForwardCalc<<<blocks_per_grid,threads_per_block>>>(d_weight[j-1],d_o[j-1],d_o[j],d_delta[j],kNumberOfUnits[j-1],kNumberOfUnits[j]);
+					cudaStatus = cudaGetLastError();
+				}
+				cudaMemcpy(h_o_o,d_o[kLevelOfNeuralNetwork-1],kOutputSize*sizeof(float),cudaMemcpyDeviceToHost);
+				for(int j=0;j<kOutputSize;j++){
+					if(*(output+kOutputSize*k+j)>0.5f){
+						testing_error+=abs(1-h_o_o[j]);
+						if(h_o_o[j]<0.5f)
+							testing_wrong++;
+					}else{
+						testing_error+=abs(h_o_o[j]);
+						if(h_o_o[j]>0.5f)
+							testing_wrong++;
+					}
+				}
+			}//for k
+			if(i%50==49){
+				printf("trainning round %6d: ",i+1);
+				printf("trainning error: %10.5f ",training_error);training_error=0;
+				printf("testing error: %10.5f ",testing_error);testing_error=0;
+				printf("wrong classification: %10.5f ",testing_wrong);testing_wrong=0;
 				printf("\n");
-		}
+			}
+		}//for i
 
-		OutputWeight(h_weight,d_weight);
-		//system("PAUSE");
+		//OutputWeight(h_weight,d_weight);
+		system("PAUSE");
 		return;
 		
 }
 
 __global__
 	void ForwardCalc(float *wei,float *in,float *o,float *delta,int number_of_last_level,int number_of_this_level){
-	int i=/*blockDim.x*blockIdx.x+*/threadIdx.x;
+	int i=blockDim.x*blockIdx.x+threadIdx.x;
 	if(i<number_of_this_level){
 		o[i]=0;
 		for(int j=0;j<number_of_last_level;j++){
@@ -140,13 +187,13 @@ __global__
 }
 
 __global__
-	void BackPropagation(float *o,float *o_last,float *target,float *delta,float* delta_front,float *wei,
-		const int k_level,const int k_number_of_this_level,const int k_number_of_last_level){
+	void BackPropagation(float *o,float *o_last,float *target,float *delta,float* delta_front,float *wei,float *delta_wei,
+		const int k_level,const int k_number_of_this_level,const int k_number_of_last_level,NN_setting* d_setting){
 		//in this section, when calculating the back propagation, the calculation do as follows:
 		//calculate the delta of one unit
 		//add up \sum delta_j * weight_ij for each unit i
 		//calc each delta wij
-		int i=/*blockDim.x*blockIdx.x+*/threadIdx.x;
+		int i=blockDim.x*blockIdx.x+threadIdx.x;
 		
 		if(i<k_number_of_this_level){
 			if(k_level==(kLevelOfNeuralNetwork-1)){
@@ -160,8 +207,11 @@ __global__
 					delta_front[j]+=delta[i]*wei[j+i*k_number_of_last_level];
 			}
 				
-			for(int j=0;j<k_number_of_last_level;j++)
-				wei[j+i*k_number_of_last_level]+=0.7*delta[i]*o_last[j];
+			for(int j=0;j<k_number_of_last_level;j++){
+				wei[j+i*k_number_of_last_level]+=0.5*delta[i]*o_last[j]+0.5*delta_wei[j+i*k_number_of_last_level];
+				delta_wei[j+i*k_number_of_last_level]=0.5*delta[i]*o_last[j];
+				//wei[j+i*k_number_of_last_level]*=(1-0.7*0.001);
+			}
 	
 		}
 

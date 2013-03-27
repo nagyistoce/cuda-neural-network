@@ -22,8 +22,10 @@ int main()
 	
     int c[arraySize] = { 0 };
 
+	cudaError_t cudaStatus = cudaDeviceReset();
+	cudaStatus = addWithCuda(c, a, b, arraySize);
     // Add vectors in parallel.
-    cudaError_t cudaStatus = addWithCuda(c, a, b, arraySize);
+    
     if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "addWithCuda failed!");
         return 1;
@@ -32,10 +34,12 @@ int main()
     printf("{1,2,3,4,5} + {10,20,30,40,50} = {%d,%d,%d,%d,%d}\n",
         c[0], c[1], c[2], c[3], c[4]);
 
-	const float in[8][4]={{0,0,0,1},{0,0,1,0},{0,1,0,0},{1,0,0,0},{1,1,0,0},{1,0,1,0},{0,0,1,1},{0,1,0,1}};
-	const float out[8][4]={{0,0,0,1},{0,0,1,0},{0,1,0,0},{1,0,0,0},{1,1,0,0},{1,0,1,0},{0,0,1,1},{0,1,0,1}};
-
-	train(8,&in[0][0],&out[0][0]);
+	const float in[12][4]={{0,0,1,1},{0,0,1,0},{0,1,0,0},{1,0,0,0},{1,1,0,0},{1,0,1,0},{0,0,1,1},{0,1,0,1},{1,1,0,1},{0,0,0,1},{1,1,1,1},{0,0,0,0}};
+	const float out[12][4]={{0,0,1,1},{0,0,1,0},{0,1,0,0},{1,0,0,0},{1,1,0,0},{1,0,1,0},{0,0,1,1},{0,1,0,1},{1,1,0,1},{0,0,0,1},{1,1,1,1},{0,0,0,0}};
+	
+	set();
+	train(9,3,in[0],out[0]);
+	//The first 7 samples will be the training samples and the last 2 samples is for testing
 
     // cudaDeviceReset must be called before exiting in order for profiling and
     // tracing tools such as Nsight and Visual Profiler to show complete traces.
