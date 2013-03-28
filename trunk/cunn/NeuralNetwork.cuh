@@ -24,10 +24,11 @@ const int kNumberOfUnits[]={4,401,4};
 struct NN_setting{
 	float learning_rate;
 	float impulse;
+	int max_threads_per_block;
 };
 
 void OutputWeight(float *(h_weight[]),float *(d_weight[]));
-void set(float learning_rate=0.5f,float impulse=0.5f);
+void set(float learning_rate,float impulse,int max_threads_per_block);
 void train(const int k_number_of_training,const int k_number_of_testing,const float* input,const float* output);
 
 __global__
@@ -49,9 +50,10 @@ void OutputWeight(float *(h_weight[]),float *(d_weight[])){
 
 NN_setting h_setting;
 NN_setting *d_setting;
-void set(float learning_rate,float impulse){
+void set(float learning_rate=0.5f,float impulse=0.5f,int max_threads_per_block=512){
 		h_setting.learning_rate=learning_rate;
 		h_setting.impulse=impulse;
+		h_setting.max_threads_per_block=max_threads_per_block;
 		cudaMalloc(&d_setting,sizeof(NN_setting));
 		cudaMemcpy(d_setting,&h_setting,sizeof(NN_setting),cudaMemcpyHostToDevice);
 	}
@@ -102,15 +104,13 @@ void train(const int k_number_of_training,const int k_number_of_testing,const fl
 			cudaStatus=cudaMalloc(&d_delta[i],kNumberOfUnits[i]*sizeof(float));
 		}
 		float training_error=0,testing_error=0,testing_wrong=0;
-		for(int i=0;i<500000;i++){
+		for(int i=0;i<1500;i++){
 			for(int k=0;k<k_number_of_training;k++){
 				//copy the input of the sample to the d_o[0]
 				cudaMemcpy(d_o[0],d_input+k*kInputSize,kInputSize*sizeof(float),cudaMemcpyDeviceToDevice);
 				for(int j=1;j<kLevelOfNeuralNetwork;j++){
-					int threads_per_block=std::min(200,kNumberOfUnits[j]);
+					int threads_per_block=std::min(h_setting.max_threads_per_block,kNumberOfUnits[j]);
 					int blocks_per_grid=(kNumberOfUnits[j]+threads_per_block-1)/threads_per_block;
-					//if(blocks_per_grid>1)
-					//	err("TOO MANY BLOCKS RUNNING AT THE SAME TIME",__FILE__,__LINE__);
 					ForwardCalc<<<blocks_per_grid,threads_per_block>>>(d_weight[j-1],d_o[j-1],d_o[j],d_delta[j],kNumberOfUnits[j-1],kNumberOfUnits[j]);
 					cudaStatus = cudaGetLastError();
 				}
@@ -122,11 +122,8 @@ void train(const int k_number_of_training,const int k_number_of_testing,const fl
 						training_error+=abs(h_o_o[j]);
 				}
 				for(int j=kLevelOfNeuralNetwork-1;j>0;j--){
-					//cudaMemset(d_delta[j-1],0,kNumberOfUnits[j-1]*sizeof(float));
-					//set all the delta in the fronter level to be zero
-					int threads_per_block=std::min(200,kNumberOfUnits[j]);
+					int threads_per_block=std::min(h_setting.max_threads_per_block,kNumberOfUnits[j]);
  					int blocks_per_grid=(kNumberOfUnits[j]+threads_per_block-1)/threads_per_block;
-					
 					BackPropagation<<<blocks_per_grid,threads_per_block>>>(d_o[j],d_o[j-1],d_output+kOutputSize*k,
 										d_delta[j],d_delta[j-1],d_weight[j-1],d_delta_weight[j-1],j,kNumberOfUnits[j],kNumberOfUnits[j-1], d_setting);	
 					cudaStatus = cudaGetLastError();
@@ -137,10 +134,8 @@ void train(const int k_number_of_training,const int k_number_of_testing,const fl
 				cudaMemcpy(d_o[0],d_input+k*kInputSize,kInputSize*sizeof(float),cudaMemcpyDeviceToDevice);
 				cudaStatus = cudaGetLastError();
 				for(int j=1;j<kLevelOfNeuralNetwork;j++){
-					int threads_per_block=std::min(200,kNumberOfUnits[j]);
+					int threads_per_block=std::min(h_setting.max_threads_per_block,kNumberOfUnits[j]);
 					int blocks_per_grid=(kNumberOfUnits[j]+threads_per_block-1)/threads_per_block;
-					//if(blocks_per_grid>1)
-					//	err("TOO MANY BLOCKS RUNNING AT THE SAME TIME",__FILE__,__LINE__);
 					ForwardCalc<<<blocks_per_grid,threads_per_block>>>(d_weight[j-1],d_o[j-1],d_o[j],d_delta[j],kNumberOfUnits[j-1],kNumberOfUnits[j]);
 					cudaStatus = cudaGetLastError();
 				}
@@ -167,7 +162,7 @@ void train(const int k_number_of_training,const int k_number_of_testing,const fl
 		}//for i
 
 		//OutputWeight(h_weight,d_weight);
-		system("PAUSE");
+		//system("PAUSE");
 		return;
 		
 }
