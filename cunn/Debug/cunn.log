@@ -1,9 +1,9 @@
-﻿Build started 2013/3/27 16:35:02.
+﻿Build started 2013/3/28 9:36:01.
      1>Project "F:\W\CUDA\cunn\cunn\cunn.vcxproj" on node 2 (clean target(s)).
      1>_PrepareForClean:
          Deleting file "Debug\cunn.lastbuildstate".
        CudaClean:
-         cmd.exe /C "C:\Users\Quan\AppData\Local\Temp\tmp53bc4a0e72044c4783da1e957442e9a4.cmd"
+         cmd.exe /C "C:\Users\Quan\AppData\Local\Temp\tmpfb6af3b641374bbd9fb9ce766506c2d2.cmd"
          "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.0\bin\nvcc.exe" -ccbin "C:\Program Files\Microsoft Visual Studio 10.0\VC\bin"  -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.0\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.0\include"  -G   --keep-dir "Debug" -maxrregcount=0  --machine 32 --compile  -g   -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /Zi /RTC1 /MDd  " -o "Debug\kernel.cu.obj" "F:\W\CUDA\cunn\cunn\kernel.cu" -clean
          
          F:\W\CUDA\cunn\cunn>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.0\bin\nvcc.exe" -ccbin "C:\Program Files\Microsoft Visual Studio 10.0\VC\bin"  -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.0\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.0\include"  -G   --keep-dir "Debug" -maxrregcount=0  --machine 32 --compile  -g   -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /Zi /RTC1 /MDd  " -o "Debug\kernel.cu.obj" "F:\W\CUDA\cunn\cunn\kernel.cu" -clean 
@@ -12,4 +12,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:00.65
+Time Elapsed 00:00:04.68
