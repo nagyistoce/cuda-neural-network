@@ -1,15 +1,21 @@
-﻿Build started 2013/3/28 9:36:01.
-     1>Project "F:\W\CUDA\cunn\cunn\cunn.vcxproj" on node 2 (clean target(s)).
+﻿生成启动时间为 2013/3/31 10:54:03。
+     1>项目“E:\W\CUDA\cunn\cunn\cunn.vcxproj”在节点 2 上(clean 个目标)。
      1>_PrepareForClean:
-         Deleting file "Debug\cunn.lastbuildstate".
+         正在删除文件“Debug\cunn.lastbuildstate”。
        CudaClean:
-         cmd.exe /C "C:\Users\Quan\AppData\Local\Temp\tmpfb6af3b641374bbd9fb9ce766506c2d2.cmd"
-         "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.0\bin\nvcc.exe" -ccbin "C:\Program Files\Microsoft Visual Studio 10.0\VC\bin"  -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.0\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.0\include"  -G   --keep-dir "Debug" -maxrregcount=0  --machine 32 --compile  -g   -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /Zi /RTC1 /MDd  " -o "Debug\kernel.cu.obj" "F:\W\CUDA\cunn\cunn\kernel.cu" -clean
+         cmd.exe /C "C:\Users\WenX\AppData\Local\Temp\tmp1f0776cebe6c4a73a79c59666626ef6d.cmd"
+         "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.0\bin\nvcc.exe" -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin"  -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.0\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.0\include"  -G   --keep-dir "Debug" -maxrregcount=0  --machine 32 --compile  -g   -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /Zi /RTC1 /MDd  " -o "Debug\CWS_data.cu.obj" "E:\W\CUDA\cunn\cunn\CWS_data.cu" -clean
          
-         F:\W\CUDA\cunn\cunn>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.0\bin\nvcc.exe" -ccbin "C:\Program Files\Microsoft Visual Studio 10.0\VC\bin"  -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.0\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.0\include"  -G   --keep-dir "Debug" -maxrregcount=0  --machine 32 --compile  -g   -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /Zi /RTC1 /MDd  " -o "Debug\kernel.cu.obj" "F:\W\CUDA\cunn\cunn\kernel.cu" -clean 
-         Deleting file "Debug\kernel.cu.deps".
-     1>Done Building Project "F:\W\CUDA\cunn\cunn\cunn.vcxproj" (clean target(s)).
+         E:\W\CUDA\cunn\cunn>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.0\bin\nvcc.exe" -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin"  -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.0\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.0\include"  -G   --keep-dir "Debug" -maxrregcount=0  --machine 32 --compile  -g   -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /Zi /RTC1 /MDd  " -o "Debug\CWS_data.cu.obj" "E:\W\CUDA\cunn\cunn\CWS_data.cu" -clean 
+         正在删除文件“Debug\CWS_data.cu.deps”。
+       CudaClean:
+         cmd.exe /C "C:\Users\WenX\AppData\Local\Temp\tmpef78428cd73f4a8586dae25ffc3a3607.cmd"
+         "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.0\bin\nvcc.exe" -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin"  -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.0\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.0\include"  -G   --keep-dir "Debug" -maxrregcount=0  --machine 32 --compile  -g   -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /Zi /RTC1 /MDd  " -o "Debug\kernel.cu.obj" "E:\W\CUDA\cunn\cunn\kernel.cu" -clean
+         
+         E:\W\CUDA\cunn\cunn>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.0\bin\nvcc.exe" -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin"  -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.0\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.0\include"  -G   --keep-dir "Debug" -maxrregcount=0  --machine 32 --compile  -g   -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /Zi /RTC1 /MDd  " -o "Debug\kernel.cu.obj" "E:\W\CUDA\cunn\cunn\kernel.cu" -clean 
+         正在删除文件“Debug\kernel.cu.deps”。
+     1>已完成生成项目“E:\W\CUDA\cunn\cunn\cunn.vcxproj”(clean 个目标)的操作。
 
-Build succeeded.
+生成成功。
 
-Time Elapsed 00:00:04.68
+已用时间 00:00:09.13
