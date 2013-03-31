@@ -78,10 +78,23 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <CudaCompile Include="CWS_data.cu" />
     <CudaCompile Include="kernel.cu" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\ChineseTest\Data\MSR2Training.CDict.txt" />
+    <None Include="..\..\..\ChineseTest\Data\MSR2Training.Dict.txt" />
+    <None Include="..\..\..\ChineseTest\Data\MSR2Training.o.txt" />
+    <None Include="..\..\..\ChineseTest\Data\MSR2Training.SEGTAG.txt" />
+    <None Include="..\..\..\ChineseTest\Data\MSR2Training.txt" />
+    <None Include="CWS_data.cuh" />
     <None Include="NeuralNetwork.cuh" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\wenx.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\wenx.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

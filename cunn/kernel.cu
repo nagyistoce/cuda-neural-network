@@ -1,10 +1,15 @@
-
+#pragma warning(disable:4819);
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 
 #include <stdio.h>
-
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#include <tchar.h>
+#include "CWS_data.cuh"
 #include "NeuralNetwork.cuh"
+using namespace std;
 
 cudaError_t addWithCuda(int *c, const int *a, const int *b, size_t size);
 
@@ -16,6 +21,7 @@ __global__ void addKernel(int *c, const int *a, const int *b)
 
 int main()
 {
+	locale loc=locale::global(locale(".936"));
     const int arraySize = 5;
     const int a[arraySize] = { 1, 2, 3, 4, 5 };
     const int b[arraySize] = { 10, 20, 30, 40, 50 };
@@ -37,8 +43,11 @@ int main()
 	const float in[12][4]={{0,0,1,1},{0,0,1,0},{0,1,0,0},{1,0,0,0},{1,1,0,0},{1,0,1,0},{0,0,1,1},{0,1,0,1},{1,1,0,1},{0,0,0,1},{1,1,1,1},{0,0,0,0}};
 	const float out[12][4]={{0,0,1,1},{0,0,1,0},{0,1,0,0},{1,0,0,0},{1,1,0,0},{1,0,1,0},{0,0,1,1},{0,1,0,1},{1,1,0,1},{0,0,0,1},{1,1,1,1},{0,0,0,0}};
 	
+
 	set();
 	train(9,3,in[0],out[0]);
+	CWS_data *data=new CWS_data("..\\..\\..\\ChineseTest\\Data\\MSR2Training.CDict.txt","..\\..\\..\\ChineseTest\\Data\\MSR2Training.o.txt","..\\..\\..\\ChineseTest\\Data\\MSR2Training.SEGTAG.txt");
+	
 	//The first 7 samples will be the training samples and the last 2 samples is for testing
 
     // cudaDeviceReset must be called before exiting in order for profiling and

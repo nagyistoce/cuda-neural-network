@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <None Include="CWS_data.cuh" />
+    <None Include="NeuralNetwork.cuh" />
+    <None Include="..\..\..\ChineseTest\Data\MSR2Training.CDict.txt">
+      <Filter>Dict</Filter>
+    </None>
+    <None Include="..\..\..\ChineseTest\Data\MSR2Training.Dict.txt">
+      <Filter>Dict</Filter>
+    </None>
+    <None Include="..\..\..\ChineseTest\Data\MSR2Training.o.txt">
+      <Filter>Dict</Filter>
+    </None>
+    <None Include="..\..\..\ChineseTest\Data\MSR2Training.SEGTAG.txt">
+      <Filter>Dict</Filter>
+    </None>
+    <None Include="..\..\..\ChineseTest\Data\MSR2Training.txt">
+      <Filter>Dict</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="CWS_data.cu" />
+    <CudaCompile Include="kernel.cu" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Dict">
+      <UniqueIdentifier>{262f8e7a-ab8b-4f9d-9990-d46a2aa79a3f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\wenx.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\wenx.cpp" />
+  </ItemGroup>
+</Project>
